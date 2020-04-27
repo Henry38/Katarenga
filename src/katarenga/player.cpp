@@ -1,5 +1,6 @@
 #include "player.hpp"
 #include "graphics.hpp"
+#include <common/board/Board.hpp>
 
 #include <functional>
 #include <algorithm>
@@ -10,8 +11,11 @@ void Player::process_server_answer_game_status(zmqpp::message& message)
     AnswerGameStatus m = ConstructObject<AnswerGameStatus>(message);
 
     // Update internal state
-    m_current_player = m.getCurrentPlayer();
-    retrieve_piece_locations(m.getConfiguration());
+    m_game_inited = true;
+    m_board->setBoardConfiguration(m.getConfiguration());
+    m_game_finished = m_board->isGameFinished();
+
+    retrieve_piece_locations(m.getConfiguration()); // TODO maybe remove it and use the list of pieces in the Board
 
     // Then forward to the render thread
     m_render_thread_socket.send(message);
@@ -25,18 +29,19 @@ void Player::process_server_move_message(zmqpp::message& message)
 
     if (type == MoveType::MovePlayed)
     {
-        if (move_player != m_current_player)
+        if (move_player != m_board->getCurrentPlayer())
         {
             throw std::runtime_error("Move received from a player not in his turn.");
             // TODO need to ask the correct board configuration to the server instead of throwing an error
         }
         else
         {
+            int src = m.getSource();
+            int dest = m.getDestination();
+
             // Update the new location of the piece if it was my move
             if (move_player == m_self_player)
             {
-                int src = m.getSource();
-                int dest = m.getDestination();
                 auto it = std::find(m_piece_locations.begin(), m_piece_locations.end(), src);
                 if (it != m_piece_locations.end())
                 {
@@ -49,7 +54,7 @@ void Player::process_server_move_message(zmqpp::message& message)
                     // TODO need to ask the correct board configuration to the server instead of throwing an error
                 }
             }
-            m_current_player = otherPlayer(m_current_player);
+            m_board->playMove(src, dest);
         }
     }
     else if (type == MoveType::InvalidMove)
@@ -109,6 +114,7 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     CaseClicked c = ConstructObject<CaseClicked>(message);
 
     int id = stoi(c.getCase());
+    player_msg("case clicked " + std::to_string(id));
 
     bool state0 = (m_memo.first == -1 && m_memo.second == -1);
     bool state1 = (m_memo.first != -1 && m_memo.second == -1);
@@ -132,17 +138,25 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
 
     if(state2)
     {
-        // Send the move to the server
-        zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, m_memo.first, m_memo.second, m_self_player);
+        // Check if the move is valid
+        if (m_board->isValidMove(m_memo.first, m_memo.second, m_self_player))
+        {
+            // Send the move to the server
+            zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, m_memo.first, m_memo.second, m_self_player);
 
-        m_server_thread_socket.send(play_message, true);
+            m_server_thread_socket.send(play_message, true);
+        }
+        else
+        {
+            // Inform the render that the move is not valid
+            zmqpp::message reject_message = ConstructMessage<MoveMessage>(MoveType::InvalidMove, m_memo.first, m_memo.second, m_self_player);
+            m_render_thread_socket.send(reject_message, true);
+        }
 
         // re-init the state
         m_memo.first = -1;
         m_memo.second = -1;
     }
-
-    player_msg("case clicked " + std::to_string(id));
 }
 
 void Player::process_graphics_ask_game_status(zmqpp::message& /*message*/)
@@ -169,10 +183,11 @@ Player::Player(GameSettings& game_settings) :
     m_render_thread_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_server_thread_reactor(),
     m_render_thread_reactor(),
-    m_game_finished(false),
+    m_board(new Board()),
+    m_game_inited(false),
     m_game_stopped(false),
+    m_game_finished(false),
     m_self_player(game_settings.self_player),
-    m_current_player(BoardPlayer::None),
     m_connected(false),
     m_piece_locations(),
     m_memo({-1,-1})

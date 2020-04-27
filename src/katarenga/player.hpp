@@ -18,6 +18,8 @@ namespace zmqpp {
     class poller;
 }
 
+class Board;
+
 /**
  * @brief The Player class lives in the main thread
  */
@@ -58,11 +60,12 @@ private:
     MessageReactor  m_render_thread_reactor;
 
     // Game-related content
-    bool m_game_finished;
+    std::unique_ptr<Board> m_board;
+    bool m_game_inited;
     bool m_game_stopped;
+    bool m_game_finished;
     BoardPlayer m_self_player;
     char m_self_player_sign;
-    BoardPlayer m_current_player;
     bool m_connected;
     std::vector<int> m_piece_locations; // The list of cell ids where my pieces are
     Memo m_memo;        // memo for case clicked by the player <src,dst>
