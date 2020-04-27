@@ -136,17 +136,22 @@ std::string format_board(const std::string& board_configuration)
     std::string s = "";
 
     s += "\n";
-    s += "    1  2  3  4  5  6  7  8   ";
+    s += "    0  1  2  3  4  5  6  7   ";
     s += "\n";
     s += "             White           ";
     s += "\n";
-    s += "  X                         X";
+    //s += "  X                         X";
+    s += "  ";
+    s += (board_configuration.at(128) == '-' ? "X" : " ");
+    s += "                         ";
+    s += (board_configuration.at(129) == '-' ? "X" : " ");
     s += "\n";
 
     std::string board = board_configuration.substr(0,128);
 
     for (int j = 0; j < 8; ++j) {
-        s += std::to_string(j+1) + "  ";
+        //s += std::to_string(j+1) + "  ";
+        s += std::to_string(j*8) + "  ";
         for (int i = 0; i < 8; ++i) {
             size_t index = (j * 8) + i;
             std::string c = board.substr(2*index,2);
@@ -155,7 +160,11 @@ std::string format_board(const std::string& board_configuration)
         s += "\n";
     }
 
-    s += "  X                         X";
+    //s += "  X                         X";
+    s += "  ";
+    s += (board_configuration.at(130) == '+' ? "X" : " ");
+    s += "                         ";
+    s += (board_configuration.at(131) == '+' ? "X" : " ");
     s += "\n";
     s += "             Black           ";
 
