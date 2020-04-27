@@ -229,6 +229,24 @@ void Board::initBoard(const std::string& boardString)
     _piecesW.push_back(new Piece(BoardPlayer::White, &_campCells[CampCell::Type::BlackRight]));
 }
 
+
+std::vector<int> Board::getReachableCells(int index)
+{
+    std::vector<int> reachable;
+    BoardCell c = indexToBoardCell(index);
+
+    if (c.getPiece() != nullptr)
+    {
+        std::vector<Move> moves;
+        fillAllMoves(c.getRow(), c.getColumn(), &moves);
+        for (Move m : moves)
+        {
+            reachable.push_back(m.second.getIndex());
+        }
+    }
+    return reachable;
+}
+
 void Board::clearAllPieces()
 {
     for (Piece* p : _piecesW)

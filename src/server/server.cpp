@@ -187,7 +187,7 @@ void Server::process_command_line(const std::string& command)
         return;
 
     // all available options here
-    static std::list<std::string> options = {"help", "h", "print", "p", "move", "m", "close", "c", "v"};
+    static std::list<std::string> options = {"help", "h", "print", "p", "move", "m", "close", "c", "reach", "r"};
 
     std::string option_found = "";
 
@@ -257,6 +257,19 @@ void Server::process_command_line(const std::string& command)
     else if(option_found == "c" || option_found == "close")
     {
         stop_the_game();
+    }
+    else if(option_found == "r" || option_found == "reach")
+    {
+        int src_index = -1;
+        std::string str = command;
+        str.erase(0, option_found.size() + 1);
+        src_index = std::stoi(str);
+        std::string s = std::to_string(src_index) + " -> ";
+
+        for (int dest : m_board->getReachableCells(src_index))
+        {
+             server_msg(s + std::to_string(dest));
+        }
     }
     else
     {

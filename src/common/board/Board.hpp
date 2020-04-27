@@ -39,6 +39,8 @@ public:
     bool isGameFinished() const;
     BoardPlayer whoWon() const;
 
+    std::vector<int> getReachableCells(int index);
+
 private:
     void nextPlayer();
     void removePiece(Piece* p);
