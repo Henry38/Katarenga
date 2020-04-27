@@ -92,7 +92,6 @@ void Server::process_player_ask_game_status(zmqpp::message& input_message, const
 void Server::process_player_stop_game(zmqpp::message& message, const GameActor &src_actor)
 {
     StopGame m = ConstructObject<StopGame>(message);
-    //int player = m.getPlayer();
 
     if (src_actor == GameActor::WhiteClient)
     {
@@ -117,7 +116,7 @@ void Server::process_player_stop_game(zmqpp::message& message, const GameActor &
     }
 
     // We do not treat any more message and quit
-    //m_game_stopped = true;
+    m_game_stopped = true;
 }
 
 
@@ -139,8 +138,7 @@ void Server::sendWonMessage()
 
 void Server::sendGameStatus(const GameActor& player)
 {
-    zmqpp::message zmq_message = ConstructMessage<AnswerGameStatus>(m_board->getBoardConfiguration(),
-                                                            m_board->getCurrentPlayer());
+    zmqpp::message zmq_message = ConstructMessage<AnswerGameStatus>(m_board->getBoardConfiguration());
     sendToActor(zmq_message, player);
 }
 
@@ -189,7 +187,7 @@ void Server::process_command_line(const std::string& command)
         return;
 
     // all available options here
-    static std::list<std::string> options = {"help", "h", "print", "p", "move", "m", "close", "c"};
+    static std::list<std::string> options = {"help", "h", "print", "p", "move", "m", "close", "c", "v"};
 
     std::string option_found = "";
 
@@ -320,7 +318,7 @@ Server::~Server()
 
 void Server::new_game()
 {
-    m_board->setBoardCellTypes(generateBoardCellTypes());
+    m_board->initBoard(generateBoardCellTypes());
     m_game_stopped = false;
 
     server_msg("New game created");

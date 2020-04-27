@@ -34,7 +34,7 @@ public:
 
 public:
     AnswerGameStatus();
-    AnswerGameStatus(const std::string& board_config, BoardPlayer current_player);
+    AnswerGameStatus(const std::string& board_config);
 
 public:
     void toMessage(zmqpp::message& message) override;
@@ -43,12 +43,8 @@ public:
     std::string getConfiguration() const;
     void setConfiguration(const std::string& configuration);
 
-    BoardPlayer getCurrentPlayer() const;
-    void setCurrentPlayer(BoardPlayer player);
-
 private:
     std::string m_configuration;
-    BoardPlayer m_current_player;
 };
 
 

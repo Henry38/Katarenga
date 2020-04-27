@@ -21,7 +21,7 @@ namespace zmqpp {
 class Board;
 
 /**
- * @brief The Player class lives in the main thread
+ * @brief The Server class lives in the main thread
  */
 class Server
 {

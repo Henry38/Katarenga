@@ -1,12 +1,17 @@
 ﻿#ifndef CELL_HPP
 #define CELL_HPP
 
+#include <string>
+
 class Piece;
 
 enum class CellType
 {
     KING, ROOK, BISHOP, KNIGHT, NONE
 };
+
+char cellTypeToChar(CellType& type);
+CellType charToCellType(char s);
 
 // Base class for all cells of the Board
 class Cell

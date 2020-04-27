@@ -23,9 +23,9 @@ public:
 
 public:
     const std::string getBoardConfiguration() const;
-    void setBoardCellTypes(const std::string& boardString);
+    void setBoardConfiguration(const std::string& boardString);
+    void initBoard(const std::string& boardString);
 
-public:
     bool isValidMove(const Move& m, BoardPlayer player) const;
     bool isValidMove(const std::string& move_str, BoardPlayer player) const;
     bool isValidMove(int src, int dest, BoardPlayer player) const;
@@ -34,22 +34,25 @@ public:
     bool playMove(const std::string& move_str);
     bool playMove(int src, int dest);
 
-    // Fills the list with possible Moves of the Piece in the cell (row,col)
-    void fillAllMoves(int row, int col, std::vector<Move>* moveList) const;
-
-public:
     BoardPlayer getCurrentPlayer() const;
-    void updateGameFinished();
+    void setCurrentPlayer(BoardPlayer& player);
     bool isGameFinished() const;
     BoardPlayer whoWon() const;
 
 private:
     void nextPlayer();
     void removePiece(Piece* p);
+    void clearAllPieces();
     const BoardCell& indexToBoardCell(int cell_index) const;
     BoardCell& indexToBoardCell(int cell_index);
     const CampCell& indexToCampCell(int campcell_index) const;
     CampCell& indexToCampCell(int campcell_index);
+    const Cell& indexToCell(int cell_index) const;
+    Cell& indexToCell(int cell_index);
+
+    // Fills the list with possible Moves of the Piece in the cell (row,col)
+    void fillAllMoves(int row, int col, std::vector<Move>* moveList) const;
+    void updateGameFinished();
 
     // Converts a Move to a string representation of that Move
     std::string moveToString(const Move& move) const;
@@ -59,8 +62,8 @@ private:
     Move indicesToMove(int src, int dest) const;
 
 private:
-    BoardCell                           _plateau[8][8];
-    std::map<CampCell::Type, CampCell>  _campCell;
+    BoardCell                           _boardCells[8][8];
+    std::map<CampCell::Type, CampCell>  _campCells;
 
     std::vector<Piece*>                 _piecesW;       // The list of White Pieces
     std::vector<Piece*>                 _piecesB;		// The list of Black Pieces

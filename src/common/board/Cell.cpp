@@ -1,6 +1,44 @@
 #include "Cell.hpp"
 #include "Piece.hpp"
 
+char cellTypeToChar(CellType& type)
+{
+    char s;
+    switch(type)
+    {
+    case CellType::KING:
+        s = 'K';
+        break;
+    case CellType::BISHOP:
+        s = 'B';
+        break;
+    case CellType::ROOK:
+        s = 'R';
+        break;
+    case CellType::KNIGHT:
+        s = 'N';
+        break;
+    default:
+        s = ' ';
+        break;
+    }
+    return s;
+}
+
+CellType charToCellType(char s)
+{
+    if (s == 'K')
+        return CellType::KING;
+    else if (s == 'N')
+        return CellType::KNIGHT;
+    else if (s == 'B')
+        return CellType::BISHOP;
+    else if (s == 'R')
+        return CellType::ROOK;
+    else
+        return CellType::NONE;
+}
+
 Cell::Cell(int row, int column) :
     _piece(nullptr),
     _row(row),
